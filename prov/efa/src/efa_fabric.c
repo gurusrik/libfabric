@@ -306,10 +306,12 @@ static int efa_get_driver(struct efa_context *ctx,
 	}
 	driver++;
 	*efa_driver = strdup(driver);
-	if (*efa_driver) {
+	if (!*efa_driver) {
 		ret = -FI_ENOMEM;
 		goto err_free_driver_sym;
 	}
+	free(driver_sym_path);
+	return 0;
 
 err_free_driver_sym:
 	free(driver_sym_path);
@@ -346,7 +348,7 @@ static int efa_get_device_version(struct efa_device_attr *efa_device_attr,
 	int ret;
 
 	*device_version = calloc(1, EFA_ABI_VER_MAX_LEN + 1);
-	if (*device_version) {
+	if (!*device_version) {
 		return -FI_ENOMEM;
 	}
 
@@ -361,7 +363,6 @@ static int efa_get_device_version(struct efa_device_attr *efa_device_attr,
 	if (ret < 0) {
 		goto free_sysfs_path;
 	}
-
 	free(sysfs_path);
 	return 0;
 
@@ -422,6 +423,9 @@ static int efa_get_pci_attr(struct efa_context *ctx,
 		ret = -FI_EINVAL;
 		goto err_free_dbdf_sym;
 	}
+	free(dbdf_sym_path);
+	return 0;
+
 err_free_dbdf_sym:
 	free(dbdf_sym_path);
 	return ret;
