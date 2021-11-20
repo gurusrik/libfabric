@@ -306,7 +306,7 @@ static int efa_get_driver(struct efa_context *ctx,
 	}
 	driver++;
 	*efa_driver = strdup(driver);
-	if (!device_attr->driver) {
+	if (*efa_driver) {
 		ret = -FI_ENOMEM;
 		goto err_free_driver_sym;
 	}
@@ -356,8 +356,8 @@ static int efa_get_device_version(struct efa_device_attr *efa_device_attr,
 	}
 
 	ret = fi_read_file(sysfs_path, "class/infiniband_verbs/abi_version",
-			   device_attr->device_version,
-			   sizeof(device_attr->device_version));
+			   *device_version,
+			   EFA_ABI_VER_MAX_LEN);
 	if (ret < 0) {
 		goto free_sysfs_path;
 	}
@@ -394,6 +394,7 @@ static int efa_get_pci_attr(struct efa_context *ctx,
 			     struct fi_pci_attr *pci_attr)
 {
 	char *dbdf_sym_path;
+	char *dbdf;
 	char dbdf_real_path[PATH_MAX];
 	int ret;
 	ret = asprintf(&dbdf_sym_path, "%s%s",
